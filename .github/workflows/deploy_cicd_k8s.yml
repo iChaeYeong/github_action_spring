@@ -59,7 +59,7 @@ jobs:
       - name: Update Deployment image
         env:
           REGISTRY: 727646470302.dkr.ecr.ap-northeast-2.amazonaws.com
-          REPOSITORY: my-ecr
+          REPOSITORY: my-ecr-lcy
           IMAGE_TAG: ${{ github.sha }}
 
         run: |

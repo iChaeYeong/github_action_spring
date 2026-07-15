@@ -1,0 +1,61 @@
+#
+#   로컬실습 방법
+#  1. docker run -d --name redis -p 6379:6379 --restart unless-stopped  redis:7-alpine
+#  2. mysql는 로컬 설치
+#
+
+
+server:
+  port: 8080
+
+spring:
+  application:
+    name: app-monolithic
+  datasource:
+    url: jdbc:mysql://localhost:3306/testdb
+    username: root
+    password: 1234
+    #    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true # SQL 포맷팅
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  # devtools 활성화
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      enabled: true
+
+logging:
+  level:
+    root: info
+    org.springframework.web: debug
+    org.hibernate.SQL: trace # 실행되는 SQL
+    org.hibernate.orm.jdbc.bind: trace # 바인딩 파라미터
+    org.hibernate.orm.jdbc.extract: trace # 결과 매핑/추출
+    org.springframework.security: DEBUG
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+jwt:
+  secretKey: rgRmR6aE+TpiGTgthuxAABo7z5jXfysZzhkO57zXf9U9xM+YD0CIHtY2M+5o9hE7KfEhuyrA/RfBAl2+QeyD5w== # 운영: 환경변수로 관리
+  secretKeyRt: GSXgsGbxTHQPE3NXTTah6NzQmAcFKlhE+VdsTimUmCMQ9ZZSdOcPorxASPAHBdDM7QBUBjMGdKBn1vW9iZAIbA==

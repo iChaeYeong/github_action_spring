@@ -1,0 +1,78 @@
+name: deploy account-backend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout GitHub
+        uses: actions/checkout@v4
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: "v1.25.9"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          aws-region: ap-northeast-2
+
+      - name: Update EKS kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --name my-cluster \
+            --region ap-northeast-2
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        env:
+          REGISTRY: 727646470302.dkr.ecr.ap-northeast-2.amazonaws.com
+          REPOSITORY: my-ecr-lcy
+          IMAGE_TAG: ${{ github.sha }}
+
+        run: |
+          docker build \
+            -t $REGISTRY/$REPOSITORY:$IMAGE_TAG \
+            -f ./Dockerfile \
+            .
+
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+      - name: Apply Kubernetes resources
+        run: |
+          kubectl apply -f "./k8s_AWS_https적용후/db_secret_https_AWS.yaml"
+          kubectl apply -f "./k8s_AWS_https적용후/redis_https_AWS.yaml"
+          kubectl apply -f "./k8s_AWS_https적용후/https_Cert_AWS.yaml"
+          kubectl apply -f "./k8s_AWS_https적용후/deploy_https_AWS.yaml"
+          kubectl apply -f "./k8s_AWS_https적용후/ingress_https_AWS.yaml"
+
+      - name: Update Deployment image
+        env:
+          REGISTRY: 727646470302.dkr.ecr.ap-northeast-2.amazonaws.com
+          REPOSITORY: my-ecr
+          IMAGE_TAG: ${{ github.sha }}
+
+        run: |
+          kubectl set image deployment/account-backend \
+            account-backend=$REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+      - name: Check Deployment rollout
+        run: |
+          kubectl rollout status deployment/account-backend \
+            --timeout=300s
+
+      - name: Check Kubernetes resources
+        run: |
+          kubectl get deployment account-backend
+          kubectl get pods -l app=account-backend
+          kubectl get service account-backend-service

@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: account-backend-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: my-issuer
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - app.lcy0813.click
+      secretName: app-lcy0813-click-tls
+  rules:
+    - host: app.lcy0813.click
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: account-backend-service
+                port:
+                  number: 80

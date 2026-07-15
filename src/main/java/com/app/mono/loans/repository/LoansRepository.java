@@ -1,0 +1,14 @@
+package com.app.mono.loans.repository;
+
+import com.app.mono.customers.entity.Customer;
+import com.app.mono.loans.entity.Loans;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
+
+public interface LoansRepository extends JpaRepository<Loans, Long> {
+
+    Optional<Loans> findByCustomer(Customer customer);
+
+    Optional<Loans> findByLoanNumber(String loanNumber);
+
+}

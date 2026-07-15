@@ -36,7 +36,7 @@ jobs:
 
       - name: Build and push Docker image
         env:
-          REGISTRY: 727646470302.dkr.ecr.ap-northeast-2.amazonaws.com
+          REGISTRY: 061039804626.dkr.ecr.ap-northeast-2.amazonaws.com
           REPOSITORY: my-ecr-lcy
           IMAGE_TAG: ${{ github.sha }}
 
